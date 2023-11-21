@@ -7,13 +7,10 @@ from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe
 import plotly.graph_objects as go
 import warnings  # this is to ignore warnings
 import plotly as py
-import datetime
-import json
-import requests
+
 import pandas as pd
 from kucoindata import get_kucoin_candle_data
 from dataextraction import *
-import streamlit.components.v1 as components
 import asyncio
 from llmsummary import *
 import streamlit as st
@@ -33,13 +30,43 @@ import matplotlib.pyplot as plt
 # import chatbot functions
 # from chatbotfunctions import *
 from chatbotfunctions import load_dictionary_csv
+import os
+import toml
+import streamlit as st
+import os
+import toml
+import openai
+
+
+
+
+def load_secrets():
+    try:
+        # Load the secrets file
+        secrets = toml.load('/.streamlit/secrets.toml') 
+
+        # Set the environment variables
+        for key, value in secrets.items():
+            os.environ[key] = value
+
+    except Exception as e:
+        print(f"Error loading secrets: {str(e)}")
 
 # Load the secrets file
 secrets = toml.load('.secrets/secrets.toml')
 
-# Set the environment variablespip l
+# Set the environment variables
 for key, value in secrets.items():
     os.environ[key] = value
+
+load_secrets()
+
+# Ask the user for OpenAI secret key
+openai_api_key = st.text_input('Enter OpenAI API token:', type='password')
+
+# Set the OpenAI API key
+if openai_api_key:
+    openai.api_key = openai_api_key
 
 warnings.filterwarnings('ignore')
 
@@ -49,25 +76,26 @@ warnings.filterwarnings('ignore')
 # lets configure a basic sidebar
 
 ticker_list = get_ticker_list()
+dict_response = asyncio.run(generate_summary_concurrently(ticker_list))
 
-# THis section loads the api key
-with st.sidebar:
-    st.title('🤖💬 OpenAI Chatbot')
-    if 'OPENAI_API_KEY' in st.secrets:
-        st.success('API key already provided!', icon='✅')
-        openai.api_key = st.secrets['OPENAI_API_KEY']
-        dict_response = asyncio.run(generate_summary_concurrently(ticker_list))
-    else:
-        openai.api_key = st.text_input(
-            'Enter OpenAI API token:', type='password')
-        if not (openai.api_key.startswith('sk-') and len(openai.api_key) == 51):
-            st.warning('Please enter your credentials!', icon='⚠️')
-        else:
-            # if key is succesfully entered
-            st.success('Proceed to entering your prompt message!', icon='👉')
-            openai.api_key = st.secrets['OPENAI_API_KEY']
-            dict_response = asyncio.run(
-                generate_summary_concurrently(ticker_list))
+# This section loads the api key
+# with st.sidebar:
+#     st.title('🤖💬 OpenAI Key Check')
+#     if 'OPENAI_API_KEY' in st.secrets:
+#         st.success('API key already provided!', icon='✅')
+#         openai.api_key = st.secrets['OPENAI_API_KEY']
+#         dict_response = asyncio.run(generate_summary_concurrently(ticker_list))
+#     else:
+#         openai.api_key = st.text_input(
+#             'Enter OpenAI API token:', type='password')
+#         if not (openai.api_key.startswith('sk-') and len(openai.api_key) == 51):
+#             st.warning('Please enter your credentials!', icon='⚠️')
+#         else:
+#             # if key is succesfully entered
+#             st.success('Proceed to entering your prompt message!', icon='👉')
+#             openai.api_key = st.secrets['OPENAI_API_KEY']
+#             dict_response = asyncio.run(
+#                 generate_summary_concurrently(ticker_list))
 
 
 # we pull the candle data from kucoin
@@ -147,11 +175,10 @@ with st.container():
     if prompt := st.chat_input(placeholder="What is this data about?"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
-        st.write(st.session_state)
+        #st.write(st.session_state)
         if not openai.api_key:
             st.info("Please add your OpenAI API key to continue.")
             st.stop()
-
         llm = ChatOpenAI(
             temperature=0, 
             model="gpt-3.5-turbo-0613", 
