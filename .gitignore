@@ -1,5 +1,4 @@
 
-#Ignore my secrets please
 .streamlit/secrets.toml
 examples.py
 examples2.py

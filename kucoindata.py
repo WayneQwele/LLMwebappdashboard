@@ -24,3 +24,16 @@ def get_kucoin_data(ticker_list: list):
         print(df_candle.shape)
 
     return orderbook_data, candle_data, market_data
+
+
+def get_kucoin_candle_data(ticker_list: list):
+    candle_data = {}
+    i = 0
+    for key in ticker_list:
+        print(key)
+
+        df_candle = main_candle(key)
+        candle_data[key] = df_candle
+        print(df_candle.shape)
+
+    return candle_data
