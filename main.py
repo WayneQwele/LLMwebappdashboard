@@ -1,6 +1,5 @@
 
 
-from langchain.chat_models import ChatOpenAI
 
 from langchain.agents import AgentType
 from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe_agent
@@ -164,11 +163,11 @@ with st.container():
 
     # --------------------------------------------------
 
-    st.write(st.session_state)
+    #st.write(st.session_state) # this is to check the session state, and track conversation history
     if "messages" not in st.session_state or st.sidebar.button("Clear conversation history"):
         st.session_state["messages"] = [
             {"role": "assistant", "content": "How can I help you?"}]
-        st.write(st.session_state["messages"])
+        #st.write(st.session_state["messages"])
 
     for msg in st.session_state.messages:
         st.chat_message(msg["role"]).write(msg["content"])
