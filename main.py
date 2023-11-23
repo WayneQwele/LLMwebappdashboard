@@ -77,7 +77,7 @@ warnings.filterwarnings('ignore')
 ticker_list = get_ticker_list()
 dict_response = asyncio.run(generate_summary_concurrently(ticker_list))
 
-# This section loads the api key
+# This section loads the api key∏
 # with st.sidebar:
 #     st.title('🤖💬 OpenAI Key Check')
 #     if 'OPENAI_API_KEY' in st.secrets:

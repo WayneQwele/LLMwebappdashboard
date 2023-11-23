@@ -23,6 +23,8 @@ def load_dictionary_csv(input_data: dict) -> pd.DataFrame:
             value['low'] = value['low'].astype(float)  # Convert 'low' column to float64
             value['volume'] = value['volume'].astype(float)  # Convert 'volume' column to float64
             value['turnover'] = value['turnover'].astype(float)  # Convert 'turnover' column to float64
+            value = value.reindex(columns=['symbols', 'date','high','low','volume','turnover'])  # Reorder columns
+            #value = value.drop(columns=['unix'])  # Remove 'unix' column
             combined_df = pd.concat([combined_df, value], ignore_index=True)
     with st.expander('See DataFrame'):
         st.write(combined_df)
